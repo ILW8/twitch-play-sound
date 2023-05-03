@@ -82,6 +82,7 @@ export default ({
         <TableRow>
           <TableCell>Command</TableCell>
           <TableCell>Access</TableCell>
+          <TableCell>File</TableCell>
           <TableCell align='right'>Actions</TableCell>
         </TableRow>
       </TableHead>
@@ -97,6 +98,9 @@ export default ({
             <TableCell>
               <IconHelper access={sound.access} />
               <T className={classes.accessText}>{sound.access}</T>
+            </TableCell>
+            <TableCell>
+              {sound.path}
             </TableCell>
             <TableCell align='right'>
               <div className='inv-actions' style={{ float: 'right' }}>
