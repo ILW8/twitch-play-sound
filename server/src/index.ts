@@ -26,7 +26,7 @@ app.get('*', (req: Request, res: Response) => {
   res.sendFile(path.resolve('..', 'client', 'build', 'index.html'))
 })
 
-app.listen(config.port, async () => {
+app.listen(config.port, config.ip, async () => {
   await migrateSoundDatabase()
   await migrateUserDatabase()
   await twitchConnection.onStartConnect()

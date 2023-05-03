@@ -102,44 +102,50 @@ class TwitchConnection {
     user: ChatUserstate,
     message: string
   ) => {
-    if (message.charAt(0) === '!') {
-      const sounds = await fetchSounds()
-      for (const sound of sounds) {
-        if (message === sound.command) {
-          const raw = user['badges-raw']
-          const isUser = await findUser(user.username)
+    // console.log(message);
+    // console.log(channel,user,message);
+    const sounds = await fetchSounds()
+    // console.log(sounds);
+    for (const sound of sounds) {
+      // console.log(sound,sounds)
+      if (message.includes(sound.command)) {
+        console.log('"' + message + '" matched filter');
+        // console.log('it exists YEP COCK')
+        const raw = user['badges-raw']
+        const isUser = await findUser(user.username)
+        // console.log(isUser);
+        if (isUser && isUser.flags.includes(PERMISSIONS.BANNED)) {
+          return
+        }
 
-          if (isUser && isUser.flags.includes(PERMISSIONS.BANNED)) {
-            return
-          }
-
-          switch (sound.access) {
-            case 'ALL':
+        switch (sound.access) {
+          case 'ALL':
+            // console.log('FUCKING FINALLY')
+            dispatchSocket(SOCKET.PLAYER, sound)
+            break
+          case 'MOD':
+            if (user.mod || (isUser && isUser.flags.includes(PERMISSIONS.ALL_ACCESS))) {
+              // console.log(message + " triggered");
               dispatchSocket(SOCKET.PLAYER, sound)
-              break
-            case 'MOD':
-              if (user.mod || (isUser && isUser.flags.includes(PERMISSIONS.ALL_ACCESS))) {
-                dispatchSocket(SOCKET.PLAYER, sound)
-              }
-              break
-            case 'SUB':
-              if (user.subscriber
-                || user.mod
-                || (raw && raw.toLowerCase().includes('vip'))
-                || (isUser && isUser.flags.includes(PERMISSIONS.ALL_ACCESS))
-              ) {
-                dispatchSocket(SOCKET.PLAYER, sound)
-              }
-              break
-            case 'VIP':
-              if (user.mod
-                || (raw && raw.toLowerCase().includes('vip'))
-                || (isUser && isUser.flags.includes(PERMISSIONS.ALL_ACCESS))
-              ) {
-                dispatchSocket(SOCKET.PLAYER, sound)
-              }
-              break
-          }
+            }
+            break
+          case 'SUB':
+            if (user.subscriber
+              || user.mod
+              || (raw && raw.toLowerCase().includes('vip'))
+              || (isUser && isUser.flags.includes(PERMISSIONS.ALL_ACCESS))
+            ) {
+              dispatchSocket(SOCKET.PLAYER, sound)
+            }
+            break
+          case 'VIP':
+            if (user.mod
+              || (raw && raw.toLowerCase().includes('vip'))
+              || (isUser && isUser.flags.includes(PERMISSIONS.ALL_ACCESS))
+            ) {
+              dispatchSocket(SOCKET.PLAYER, sound)
+            }
+            break
         }
       }
     }
