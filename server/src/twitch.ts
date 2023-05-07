@@ -6,6 +6,7 @@ import { dispatchSocket } from './socket'
 import { SOCKET, PERMISSIONS } from './enum'
 import { fetchSounds } from './datastore'
 import { findUser } from './users'
+import {fetchWhitelists} from "./whitelists";
 
 const fileConfig = './db/db-twitch.json'
 
@@ -105,7 +106,7 @@ class TwitchConnection {
     const sounds = await fetchSounds()
     for (const sound of sounds) {
       if (message.includes(sound.command)) {
-        console.log('"' + message + '" matched filter')
+        // console.log('"' + message + '" matched filter')
         const userBadgesRaw = user['badges-raw']
         const isUser = await findUser(user.username)
         if (isUser && isUser.flags.includes(PERMISSIONS.BANNED)) {
@@ -122,7 +123,7 @@ class TwitchConnection {
         let allowSound = false
 
         // check user role access
-        for (const permRole of AccessLevelRolesConst) {
+        for (const permRole of sound.access) {
           if (allowSound) break
 
           switch (permRole) {
@@ -154,12 +155,32 @@ class TwitchConnection {
           }
         }
 
-        // else check whitelist
-        // if (!allowSound) { // only check if not already allowed
-        //
-        // }
+        // noinspection LoopStatementThatDoesntLoopJS
+        while (!allowSound) { // for control flow purposes
+          if (user.username === undefined) break // if username undefined, don't bother checking whitelist
+
+          // else check allowed user list
+          for (const allowedUsername of sound.accessUsernames) {
+            if (allowedUsername.toLowerCase() === user.username.toLowerCase()) {
+              allowSound = true
+              break
+            }
+          }
+          if (allowSound) break // avoid checking whitelist if sound is already allowed to play
+
+          // else check whitelist
+          const whitelists = await fetchWhitelists()
+          for (const whitelistName of sound.accessWhitelists) {
+            if (whitelistName in whitelists && user.username in whitelists[whitelistName]) {
+              allowSound = true
+              break
+            }
+          }
+          break
+        }
 
         if (allowSound) {
+          console.log('[' + new Date().toISOString() + '] playing sound "' + sound.command + '"')
           dispatchSocket(SOCKET.PLAYER, sound)
         }
       }
