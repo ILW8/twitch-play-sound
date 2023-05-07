@@ -34,7 +34,10 @@ export const useWhitelists = (): WhitelistContext => {
       setWhitelists(whitelists)
     })
 
-  const editWhitelist = (name: string, whitelist: Whitelist): Promise<void> => new Promise((resolve, reject) => resolve())
+  const editWhitelist = (name: string, whitelist: Whitelist): Promise<void> => client.editWhitelist(name, whitelist)
+    .then(whitelists => {
+      setWhitelists(whitelists)
+    })
 
   useEffect(() => {
     getUsers()

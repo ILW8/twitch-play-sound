@@ -237,7 +237,7 @@ router.put('/whitelists/:name', async (req: Request, res: Response) => { // todo
     const whitelistName: string = req.params.name
     let { data }: { data: string[] } = req.body
     await updateWhitelist(whitelistName, data)
-    return res.status(200).send(data)
+    return res.status(200).send(JSON.stringify(await fetchWhitelists())) // todo: JSON.stringify(await fetchWhitelists()) awfully inefficient
   }
   catch (e) {
     return res

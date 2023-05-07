@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
-import { Layout, WhitelistsTable, NewWhitelistDialog, EditUserDialog } from '.'
-import { User } from '../../types'
+import { Layout, WhitelistsTable, NewWhitelistDialog, EditWhitelistDialog } from '.'
+import { Whitelist } from '../../types'
 import { Plus } from 'mdi-material-ui'
-import { useUsers, useWhitelists } from '../../hooks'
+import { useWhitelists } from '../../hooks'
 
 import {
   createStyles,
@@ -26,14 +26,7 @@ const useStyles = makeStyles((theme: Theme) =>
 export default () => {
   const classes = useStyles()
   const [ isNewDialogOpen, setIsNewDialogOpen ] = useState(false)
-  const [ editableUser, setEditableUser ] = useState<null | User>(null)
-  const {
-    users,
-    loading,
-    addUser,
-    deleteUser,
-    editUser
-  } = useUsers()
+  const [ editableWhitelist, setEditableWhitelist ] = useState<null | {name: string, whitelist: Whitelist}>(null)
 
   const {
     whitelists,
@@ -45,12 +38,12 @@ export default () => {
 
   return (
     <>
-      <Layout title='Manage Users'>
+      <Layout title='Manage Whitelists'>
         <WhitelistsTable
           whitelists={whitelists}
           loading={whitelistsLoading}
           onDelete={deleteWhitelist}
-          onEdit={(user) => setEditableUser(user)}
+          onEdit={(whitelistName) => setEditableWhitelist(whitelistName)}
         />
       </Layout>
       <div className={classes.action}>
@@ -68,12 +61,12 @@ export default () => {
         onClose={() => setIsNewDialogOpen(false)}
         onAdd={addWhitelist}
       />
-      <EditUserDialog
-        isOpen={editableUser !== null}
-        onClose={() => setEditableUser(null)}
-        user={editableUser}
-        onEdit={editUser}
-        setUser={setEditableUser}
+      <EditWhitelistDialog
+        isOpen={editableWhitelist !== null}
+        onClose={() => setEditableWhitelist(null)}
+        whitelist={editableWhitelist}
+        onEdit={editWhitelist}
+        setWhitelist={setEditableWhitelist}
       />
     </>
   )

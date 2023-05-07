@@ -1,7 +1,6 @@
-import React, { Dispatch, SetStateAction, Fragment } from 'react'
+import React, { Dispatch, SetStateAction, Fragment, useState } from 'react'
 
-import { UserFlags, User } from '../../../types'
-import userFlags from '../../../enums/userFlags'
+import { Whitelist } from '../../../types'
 import { customColors } from '../../../theme'
 
 import {
@@ -75,42 +74,53 @@ const MenuProps = {
 interface Props {
   isOpen: boolean,
   onClose: () => void,
-  onEdit: (sound: User) => Promise<void>,
-  user: User | null,
-  setUser: Dispatch<SetStateAction<User | null>>
+  onEdit: (name: string, whitelist: Whitelist) => Promise<void>,
+  whitelist: {name: string, whitelist: Whitelist} | null,
+  setWhitelist: Dispatch<SetStateAction<{name: string, whitelist: Whitelist} | null>>
 }
 
 export default ({
   isOpen,
   onClose,
   onEdit,
-  user,
-  setUser
+  whitelist,
+  setWhitelist
 }: Props) => {
   const classes = useStyles()
+
+  const [newName, setNewName] = useState<string>('')
+
+  const appendToWhitelist = () => {
+    if (whitelist === null) return
+    if (!whitelist.whitelist.includes(newName)) {
+      let _whitelist = whitelist.whitelist
+      _whitelist.push(newName)
+      setWhitelist({
+        ...whitelist,
+        whitelist: _whitelist
+      })
+    }
+  }
 
   const _handleClose = () => {
     onClose()
   }
 
   const handleChange = (e: React.ChangeEvent<{ value: unknown }>) => {
-    if (user) {
-      setUser({
-        ...user,
-        flags: e.target.value as UserFlags[]
-      })
+    if (whitelist === null) return
+    setWhitelist({
+      ...whitelist,
+      whitelist: e.target.value as Whitelist
+    })
+  }
+
+  const _handleSaveEditWhitelist = () => {
+    if (whitelist && whitelist.name !== '') {
+      onEdit(whitelist.name, whitelist.whitelist).then(() => onClose()).catch(() => onClose())
     }
   }
 
-  const _handleEditUser = () => {
-    if (user && user.username !== '') {
-      onEdit(user)
-        .then(() => onClose())
-        .catch(() => onClose())
-    }
-  }
-
-  if (user === null) {
+  if (whitelist === null) {
     return <Fragment />
   }
 
@@ -126,20 +136,29 @@ export default ({
       <DialogContent>
         <TextField
           label='Twitch Username'
-          value={user.username}
-          onChange={e => setUser({
-            ...user,
-            username: e.currentTarget.value
-          })}
+          value={whitelist.name}
+          disabled
           fullWidth
           variant='outlined'
           className={classes.text}
         />
+
+        <TextField
+          label='Twitch username'
+          onChange={e => setNewName(e.currentTarget.value)}
+          fullWidth
+          variant='outlined'
+          className={classes.text}
+        />
+        <Button variant={'contained'} onClick={appendToWhitelist} color='primary'>
+          Add {newName} to whitelist
+        </Button>
+
         <FormControl className={classes.text}>
-          <InputLabel htmlFor='select-multiple-chip'>Chip</InputLabel>
+          <InputLabel htmlFor='select-multiple-chip'>Whitelisted usernames</InputLabel>
           <Select
             multiple
-            value={user.flags}
+            value={whitelist.whitelist}
             onChange={handleChange}
             input={<Input id='select-multiple-chip' />}
             fullWidth
@@ -152,7 +171,7 @@ export default ({
             )}
             MenuProps={MenuProps}
           >
-            {userFlags.map(name => (
+            {whitelist.whitelist.map(name => (
               <MenuItem key={name} value={name}>
                 {name}
               </MenuItem>
@@ -164,11 +183,9 @@ export default ({
         <Button onClick={_handleClose} color='secondary'>
           Close
         </Button>
-        {user.username !== '' && (
-          <Button onClick={_handleEditUser} color='primary'>
-            Edit
-          </Button>
-        )}
+        <Button onClick={_handleSaveEditWhitelist} color='primary' disabled={whitelist.name === ''}>
+          Save edit
+        </Button>
       </DialogActions>
     </Dialog>
   )
