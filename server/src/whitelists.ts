@@ -6,7 +6,6 @@ const readWhitelists = (): Promise<{[key: string]: string[]}> => new Promise((re
   jsonfile.readFile(fileWhitelists, (err, mainObj: {[key: string]: string[]}) => {
     if (err) {
       if (err.code === 'ENOENT') {
-        console.log('aaaaaaaaaaaaa')
         jsonfile.writeFile(fileWhitelists, {}, (err) => {
           if (err) reject(err)
           resolve({})

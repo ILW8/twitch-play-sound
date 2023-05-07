@@ -1,13 +1,13 @@
 import * as jsonfile from 'jsonfile'
 import { Client, ChatUserstate } from 'tmi.js'
-import { TwitchConfig, AccessLevelRolesConst } from './types'
+import { TwitchConfig } from './types'
 import config from './config'
 import { dispatchSocket } from './socket'
 import { SOCKET, PERMISSIONS } from './enum'
 import { fetchSounds } from './datastore'
 import { findUser } from './users'
-import {fetchWhitelists} from "./whitelists";
-import * as console from "console";
+import { fetchWhitelists } from './whitelists'
+import * as console from 'console'
 
 const fileConfig = './db/db-twitch.json'
 
@@ -113,13 +113,6 @@ class TwitchConnection {
         if (isUser && isUser.flags.includes(PERMISSIONS.BANNED)) {
           return
         }
-
-        // check access
-        // for (const permRole of AccessLevelRolesConst) {
-        //
-        // }
-        // AccessLevelRolesConst.includes()
-        // console.log(user.subscriber)
 
         let allowSound = false
 
