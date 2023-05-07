@@ -4,7 +4,15 @@ const fileWhitelists = './db/db-whitelists.json'
 
 const readWhitelists = (): Promise<{[key: string]: string[]}> => new Promise((resolve, reject) => {
   jsonfile.readFile(fileWhitelists, (err, mainObj: {[key: string]: string[]}) => {
-    if (err) reject(err)
+    if (err) {
+      if (err.code === 'ENOENT') {
+        console.log('aaaaaaaaaaaaa')
+        jsonfile.writeFile(fileWhitelists, {}, (err) => {
+          if (err) reject(err)
+          resolve({})
+        })
+      }
+    }
     resolve(mainObj)
   })
 })
@@ -19,24 +27,24 @@ const setWhitelists = (
 })
 
 export const addWhitelist = async (
-  whitelistName: string
-): Promise<boolean> => {
+  whitelistName: string,
+  data: string[]
+): Promise<string> => {
   try {
     const whitelists = await readWhitelists()
 
     if (!(whitelistName in whitelists)) {
-      whitelists[whitelistName] = []
+      whitelists[whitelistName] = data
       await setWhitelists(whitelists)
-
-      return true
     }
     else {
-      return false
+      throw new Error('whitelist "' + whitelistName + '" already exists')
     }
+    return whitelistName
   }
   catch (err) {
     console.log(err)
-    throw new Error(err)
+    throw err
   }
 }
 

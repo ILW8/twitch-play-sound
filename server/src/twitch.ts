@@ -1,6 +1,6 @@
 import * as jsonfile from 'jsonfile'
 import { Client, ChatUserstate } from 'tmi.js'
-import { TwitchConfig } from './types'
+import { TwitchConfig, AccessLevelRolesConst } from './types'
 import config from './config'
 import { dispatchSocket } from './socket'
 import { SOCKET, PERMISSIONS } from './enum'
@@ -102,50 +102,65 @@ class TwitchConnection {
     user: ChatUserstate,
     message: string
   ) => {
-    // console.log(message);
-    // console.log(channel,user,message);
     const sounds = await fetchSounds()
-    // console.log(sounds);
     for (const sound of sounds) {
-      // console.log(sound,sounds)
       if (message.includes(sound.command)) {
-        console.log('"' + message + '" matched filter');
-        // console.log('it exists YEP COCK')
-        const raw = user['badges-raw']
+        console.log('"' + message + '" matched filter')
+        const userBadgesRaw = user['badges-raw']
         const isUser = await findUser(user.username)
-        // console.log(isUser);
         if (isUser && isUser.flags.includes(PERMISSIONS.BANNED)) {
           return
         }
 
-        switch (sound.access) {
-          case 'ALL':
-            // console.log('FUCKING FINALLY')
-            dispatchSocket(SOCKET.PLAYER, sound)
-            break
-          case 'MOD':
-            if (user.mod || (isUser && isUser.flags.includes(PERMISSIONS.ALL_ACCESS))) {
-              // console.log(message + " triggered");
-              dispatchSocket(SOCKET.PLAYER, sound)
-            }
-            break
-          case 'SUB':
-            if (user.subscriber
-              || user.mod
-              || (raw && raw.toLowerCase().includes('vip'))
-              || (isUser && isUser.flags.includes(PERMISSIONS.ALL_ACCESS))
-            ) {
-              dispatchSocket(SOCKET.PLAYER, sound)
-            }
-            break
-          case 'VIP':
-            if (user.mod
-              || (raw && raw.toLowerCase().includes('vip'))
-              || (isUser && isUser.flags.includes(PERMISSIONS.ALL_ACCESS))
-            ) {
-              dispatchSocket(SOCKET.PLAYER, sound)
-            }
-            break
+        // check access
+        // for (const permRole of AccessLevelRolesConst) {
+        //
+        // }
+        // AccessLevelRolesConst.includes()
+        // console.log(user.subscriber)
+
+        let allowSound = false
+
+        // check user role access
+        for (const permRole of AccessLevelRolesConst) {
+          if (allowSound) break
+
+          switch (permRole) {
+            case 'ALL':
+              allowSound = true
+              break
+            case 'MOD':
+              if (user.mod || (isUser && isUser.flags.includes(PERMISSIONS.ALL_ACCESS))) {
+                allowSound = true
+              }
+              break
+            case 'SUB':
+              if (user.subscriber
+                  || user.mod
+                  || (userBadgesRaw && userBadgesRaw.toLowerCase().includes('vip'))
+                  || (isUser && isUser.flags.includes(PERMISSIONS.ALL_ACCESS))
+              ) {
+                allowSound = true
+              }
+              break
+            case 'VIP':
+              if (user.mod
+                  || (userBadgesRaw && userBadgesRaw.toLowerCase().includes('vip'))
+                  || (isUser && isUser.flags.includes(PERMISSIONS.ALL_ACCESS))
+              ) {
+                allowSound = true
+              }
+              break
+          }
+        }
+
+        // else check whitelist
+        // if (!allowSound) { // only check if not already allowed
+        //
+        // }
+
+        if (allowSound) {
+          dispatchSocket(SOCKET.PLAYER, sound)
         }
       }
     }

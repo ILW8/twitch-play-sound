@@ -1,16 +1,21 @@
-export type AccessLevel = 'ALL' | 'VIP' | 'MOD' | 'SUB'
+export const AccessLevelRolesConst = ['ALL', 'VIP', 'MOD', 'SUB'] as const
+export type AccessLevelRoles = typeof AccessLevelRolesConst[number];
 export type UserFlags = 'ban' | 'all-access'
 
-export interface Sound {
+export interface Sound { // for the backend
   id: string,
-  access: AccessLevel,
+  access: AccessLevelRoles[], // list of access roles
+  accessWhitelists: string[], // list of whitelists
+  accessUsernames: string[], // list of usernames
   command: string,
   path: string,
   level: number
 }
 
-export interface SoundRequest {
-  access: AccessLevel,
+export interface SoundRequest { // for the frontend?
+  access: AccessLevelRoles[], // list of access roles
+  accessWhitelists: string[], // list of whitelists
+  accessUsernames: string[], // list of usernames
   command: string,
   path: string,
   level: number
