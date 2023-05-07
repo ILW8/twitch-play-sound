@@ -20,7 +20,15 @@ const readWhitelists = (): Promise<{[key: string]: string[]}> => new Promise((re
 const setWhitelists = (
   data: {[key: string]: string[] }
 ) => new Promise((resolve, reject) => {
-  jsonfile.writeFile(fileWhitelists, data, (err) => {
+  let newData = {}
+  for (const key in data) {
+    let newEntry: string[] = []
+    for (const value of data[key]) {
+      newEntry.push(value.toLowerCase())
+    }
+    newData[key] = newEntry
+  }
+  jsonfile.writeFile(fileWhitelists, newData, (err) => {
     if (err) reject(err)
     resolve()
   })

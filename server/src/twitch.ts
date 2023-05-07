@@ -7,6 +7,7 @@ import { SOCKET, PERMISSIONS } from './enum'
 import { fetchSounds } from './datastore'
 import { findUser } from './users'
 import {fetchWhitelists} from "./whitelists";
+import * as console from "console";
 
 const fileConfig = './db/db-twitch.json'
 
@@ -171,7 +172,8 @@ class TwitchConnection {
           // else check whitelist
           const whitelists = await fetchWhitelists()
           for (const whitelistName of sound.accessWhitelists) {
-            if (whitelistName in whitelists && user.username in whitelists[whitelistName]) {
+            if (!(whitelistName in whitelists)) continue
+            if (whitelists[whitelistName].includes(user.username.toLowerCase())) {
               allowSound = true
               break
             }
