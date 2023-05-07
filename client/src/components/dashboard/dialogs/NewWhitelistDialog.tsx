@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 
-import { UserFlags, NewUser } from '../../../types'
-import userFlags from '../../../enums/userFlags'
+import { Whitelist } from '../../../types'
 import { customColors } from '../../../theme'
 
 import {
@@ -75,19 +74,19 @@ const MenuProps = {
 interface Props {
   isOpen: boolean,
   onClose: () => void,
-  onAdd: (sound: NewUser) => Promise<void>
+  onAdd: (name: string, whitelist: Whitelist) => Promise<void>
 }
 
 interface State {
-  flags: UserFlags[],
-  username: string,
+  name: string,
+  whitelist: Whitelist,
   error: boolean
 }
 
 const getInitialState = (): State => ({
-  username: '',
-  flags: [],
-  error: false
+  name: '',
+  whitelist: [],
+  error: true
 })
 
 export default ({
@@ -97,6 +96,7 @@ export default ({
 }: Props) => {
   const classes = useStyles()
   const [state, setState] = useState<State>(getInitialState)
+  const [newName, setNewName] = useState<string>('')
 
   const _handleClose = () => {
     onClose()
@@ -106,16 +106,28 @@ export default ({
   const handleChange = (e: React.ChangeEvent<{ value: unknown }>) => {
     setState({
       ...state,
-      flags: e.target.value as UserFlags[]
+      whitelist: e.target.value as Whitelist
     })
   }
 
-  const _handleNewUser = () => {
-    if (state.username !== '') {
-      onAdd({
-        username: state.username,
-        flags: state.flags
+  const appendToWhitelist = () => {
+    if (!state.whitelist.includes(newName)) {
+      let whitelist = state.whitelist
+      whitelist.push(newName)
+      setState({
+        ...state,
+        whitelist: whitelist
       })
+    }
+  }
+
+  const _handleNewWhitelist = () => {
+    console.log('-------')
+    console.log('_handleNewWhitelist')
+    console.log(state.name)
+    console.log(state.whitelist)
+    if (state.name !== '') {
+      onAdd(state.name, state.whitelist)
         .then(() => {
           onClose()
           setState(getInitialState)
@@ -137,25 +149,38 @@ export default ({
       onClose={_handleClose}
       aria-labelledby='active-dialog-title'
     >
-      <DialogTitle id='active-dialog-title'>Add new user</DialogTitle>
+      <DialogTitle id='active-dialog-title'>Add new whitelist</DialogTitle>
       <DialogContent>
         <TextField
-          label='Twitch Username'
-          value={state.username}
+          label='Whitelist name'
+          value={state.name}
           onChange={e => setState({
             ...state,
-            username: e.currentTarget.value
+            error: e.currentTarget.value.length === 0,
+            name: e.currentTarget.value
           })}
           fullWidth
           error={state.error}
           variant='outlined'
           className={classes.text}
         />
+
+        <TextField
+          label='Twitch username'
+          onChange={e => setNewName(e.currentTarget.value)}
+          fullWidth
+          variant='outlined'
+          className={classes.text}
+        />
+        <Button variant={'contained'} onClick={appendToWhitelist} color='primary'>
+          Add {newName} to whitelist
+        </Button>
+
         <FormControl className={classes.text}>
-          <InputLabel htmlFor='select-multiple-chip'>Chip</InputLabel>
+          <InputLabel htmlFor='select-multiple-chip' />
           <Select
             multiple
-            value={state.flags}
+            value={state.whitelist}
             onChange={handleChange}
             input={<Input id='select-multiple-chip' />}
             fullWidth
@@ -168,7 +193,7 @@ export default ({
             )}
             MenuProps={MenuProps}
           >
-            {userFlags.map(name => (
+            {state.whitelist.map(name => (
               <MenuItem key={name} value={name}>
                 {name}
               </MenuItem>
@@ -180,11 +205,9 @@ export default ({
         <Button onClick={_handleClose} color='secondary'>
           Close
         </Button>
-        {state.username !== '' && (
-          <Button onClick={_handleNewUser} color='primary'>
-            Add
-          </Button>
-        )}
+        <Button onClick={_handleNewWhitelist} color='primary' disabled={state.name === ''}>
+          Add
+        </Button>
       </DialogActions>
     </Dialog>
   )

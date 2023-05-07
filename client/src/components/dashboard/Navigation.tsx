@@ -7,7 +7,7 @@ import clsx from 'clsx'
 import HomePage from './HomePage'
 import SoundPage from './SoundPage'
 import ConnectionPage from './ConnectionPage'
-import UserPage from './UserPage'
+import WhitelistsPage from './WhitelistsPage'
 
 import {
   AppBar,
@@ -38,10 +38,10 @@ const routes = [
     component: SoundPage
   },
   {
-    name: 'Users',
+    name: 'Whitelists',
     path: '/dashboard/users',
     icon: Account,
-    component: UserPage
+    component: WhitelistsPage
   },
   {
     name: 'Connections',

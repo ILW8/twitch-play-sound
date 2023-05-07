@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
-import { Layout, UserTable, NewUserDialog, EditUserDialog } from '.'
+import { Layout, WhitelistsTable, NewWhitelistDialog, EditUserDialog } from '.'
 import { User } from '../../types'
 import { Plus } from 'mdi-material-ui'
-import { useUsers } from '../../hooks'
+import { useUsers, useWhitelists } from '../../hooks'
 
 import {
   createStyles,
@@ -35,13 +35,21 @@ export default () => {
     editUser
   } = useUsers()
 
+  const {
+    whitelists,
+    loading: whitelistsLoading,
+    addWhitelist,
+    deleteWhitelist,
+    editWhitelist
+  } = useWhitelists()
+
   return (
     <>
       <Layout title='Manage Users'>
-        <UserTable
-          users={users}
-          loading={loading}
-          onDelete={deleteUser}
+        <WhitelistsTable
+          whitelists={whitelists}
+          loading={whitelistsLoading}
+          onDelete={deleteWhitelist}
           onEdit={(user) => setEditableUser(user)}
         />
       </Layout>
@@ -55,10 +63,10 @@ export default () => {
           </Fab>
         </Tooltip>
       </div>
-      <NewUserDialog
+      <NewWhitelistDialog
         isOpen={isNewDialogOpen}
         onClose={() => setIsNewDialogOpen(false)}
-        onAdd={addUser}
+        onAdd={addWhitelist}
       />
       <EditUserDialog
         isOpen={editableUser !== null}

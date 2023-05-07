@@ -1,4 +1,5 @@
 import * as jsonfile from 'jsonfile'
+import { Whitelists } from './types'
 
 const fileWhitelists = './db/db-whitelists.json'
 
@@ -17,7 +18,7 @@ const readWhitelists = (): Promise<{[key: string]: string[]}> => new Promise((re
 })
 
 const setWhitelists = (
-  data: {[key: string]: string[] }
+  data: Whitelists
 ) => new Promise((resolve, reject) => {
   let newData = {}
   for (const key in data) {
@@ -36,7 +37,9 @@ const setWhitelists = (
 export const addWhitelist = async (
   whitelistName: string,
   data: string[]
-): Promise<string> => {
+): Promise<Whitelists> => {
+  console.log(whitelistName)
+  console.log(data)
   try {
     const whitelists = await readWhitelists()
 
@@ -47,7 +50,7 @@ export const addWhitelist = async (
     else {
       throw new Error('whitelist "' + whitelistName + '" already exists')
     }
-    return whitelistName
+    return whitelists
   }
   catch (err) {
     console.log(err)
@@ -57,16 +60,15 @@ export const addWhitelist = async (
 
 export const deleteWhitelist = async (
   whitelistName: string
-): Promise<boolean> => {
+): Promise<Whitelists> => {
   try {
     const whitelists = await readWhitelists()
 
     if (whitelistName in whitelists) {
       delete whitelists[whitelistName]
       await setWhitelists(whitelists)
-      return true
     }
-    return false
+    return whitelists
   }
   catch (err) {
     console.log(err)

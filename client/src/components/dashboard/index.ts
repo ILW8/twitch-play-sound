@@ -12,7 +12,9 @@ import NewSoundDialog from './dialogs/NewSoundDialog'
 import EditSoundDialog from './dialogs/EditSoundDialog'
 import UserPage from './UserPage'
 import UserTable from './UserTable'
+import WhitelistsTable from './WhitelistsTable'
 import NewUserDialog from './dialogs/NewUserDialog'
+import NewWhitelistDialog from './dialogs/NewWhitelistDialog'
 import EditUserDialog from './dialogs/EditUserDialog'
 
 export {
@@ -30,6 +32,8 @@ export {
   EditSoundDialog,
   UserPage,
   UserTable,
+  WhitelistsTable,
   NewUserDialog,
+  NewWhitelistDialog,
   EditUserDialog
 }

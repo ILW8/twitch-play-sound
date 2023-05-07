@@ -249,10 +249,10 @@ router.put('/whitelists/:name', async (req: Request, res: Response) => { // todo
 router.delete('/whitelists/:name', async (req: Request, res: Response) => {
   try {
     if (await deleteWhitelist(req.params.name)) {
-      return res.status(200).send("'" + req.params.name + "' deleted")
+      return res.status(200).send(JSON.stringify(await fetchWhitelists()))
     }
     else {
-      return res.status(400).send("failed to delete whitelist '" + req.params.name + "'")
+      return res.status(400).send(JSON.stringify({ error: "failed to delete whitelist '" + req.params.name + "'" }))
     }
   }
   catch (e) {

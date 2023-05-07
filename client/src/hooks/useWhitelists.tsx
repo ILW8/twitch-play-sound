@@ -1,46 +1,50 @@
 import { useState, useEffect } from 'react'
-import { User, NewUser } from '../types'
+import { Whitelist, Whitelists } from '../types'
 
 import * as client from '../client'
 
-interface UserContext {
-  users: User[],
+interface WhitelistContext {
+  whitelists: Whitelists,
   loading: boolean,
-  addUser: (set: NewUser) => Promise<void>,
-  editUser: (set: User) => Promise<void>,
-  deleteUser: (id: string) => Promise<void>
+  addWhitelist: (name: string, whitelist: Whitelist) => Promise<void>,
+  editWhitelist: (name: string, whitelist: Whitelist) => Promise<void>,
+  deleteWhitelist: (name: string) => Promise<void>
 }
 
-export const useUsers = (): UserContext => {
-  const [users, setUsers] = useState<User[]>([])
+export const useWhitelists = (): WhitelistContext => {
+  const [whitelists, setWhitelists] = useState<{[key: string]: string[]}>({})
   const [loading, setLoading] = useState(true)
 
-  const getUsers = () => client.fetchUsers()
-    .then(users => {
-      setUsers(users)
+  const getUsers = () => client.fetchWhitelists()
+    .then(whitelists => {
+      setWhitelists(whitelists)
       setLoading(false)
     })
 
-  const addUser = (
-    user: NewUser
-  ): Promise<void> => client.addUsers(user)
-    .then(s => setUsers([ ...users, s ]))
+  const addWhitelist = (
+    name: string,
+    whitelist: Whitelist
+  ): Promise<void> => client.addWhitelist(name, whitelist)
+    .then(whitelists => {
+      setWhitelists(whitelists)
+    })
 
-  const deleteUser = (id: string) => client.deleteUsers(id)
-    .then(users => setUsers(users))
+  const deleteWhitelist = (name: string): Promise<void> => client.deleteWhitelist(name)
+    .then(whitelists => {
+      setWhitelists(whitelists)
+    })
 
-  const editUser = (user: User) => client.editUser(user.id, user)
-    .then(u => setUsers(users.map(i => i.id === u.id ? u : i)))
+  const editWhitelist = (name: string, whitelist: Whitelist): Promise<void> => new Promise((resolve, reject) => resolve())
 
   useEffect(() => {
     getUsers()
   }, [])
 
   return {
-    users,
+    whitelists,
     loading,
-    addUser,
-    editUser,
-    deleteUser
+    addWhitelist,
+    deleteWhitelist,
+    editWhitelist
   }
 }

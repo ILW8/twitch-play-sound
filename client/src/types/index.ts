@@ -1,16 +1,18 @@
-export type AccessLevel = 'ALL' | 'VIP' | 'MOD' | 'SUB'
+export type AccessLevel = 'ALL' | 'VIP' | 'MOD' | 'SUB' | 'WHITELIST'
 export type UserFlags = 'ban' | 'all-access'
+
+export type AccessPermissions = string[];
 
 export interface Sound {
   id: string,
-  access: AccessLevel,
+  access: AccessPermissions,
   command: string,
   path: string,
   level: number
 }
 
 export interface NewSound {
-  access: AccessLevel,
+  access: AccessPermissions,
   command: string,
   file: File,
   level: number
@@ -41,6 +43,12 @@ export interface User {
   id: string,
   username: string,
   flags: UserFlags[]
+}
+
+export type Whitelist = string[]
+
+export interface Whitelists {
+  [key: string]: Whitelist
 }
 
 export interface NewUser {

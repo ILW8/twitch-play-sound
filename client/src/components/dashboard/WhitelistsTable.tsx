@@ -2,7 +2,7 @@ import React from 'react'
 import clsx from 'clsx'
 
 import {
-  User
+  User, Whitelists
 } from '../../types'
 
 import {
@@ -46,14 +46,14 @@ const useStyles = makeStyles((theme: Theme) =>
 )
 
 interface Props {
-  users: User[],
+  whitelists: Whitelists,
   loading: boolean,
   onDelete: (id: string) => void,
   onEdit: (user: User) => void
 }
 
 export default ({
-  users,
+  whitelists,
   loading,
   onDelete,
   onEdit
@@ -70,45 +70,44 @@ export default ({
     <Table className={classes.table}>
       <TableHead>
         <TableRow>
-          <TableCell>Username</TableCell>
-          <TableCell>Permissions</TableCell>
+          <TableCell>Whitelist name</TableCell>
+          <TableCell>Users</TableCell>
           <TableCell align='right'>Actions</TableCell>
         </TableRow>
       </TableHead>
       <TableBody>
-        {users.map(user => (
-          <TableRow
-            key={user.id}
-            className='contains-inv-actions'
-          >
-            <TableCell component='th' scope='row'>
-              {user.username}
-            </TableCell>
-            <TableCell>
-              {user.flags.map(i => <T key={i}>{i} </T>)}
-            </TableCell>
-            <TableCell align='right'>
-              <div className='inv-actions' style={{ float: 'right' }}>
-                <Tooltip placement='top' title='Edit user'>
-                  <IconButton
-                    className={clsx(classes.small, classes.iconOffset)}
-                    onClick={() => onEdit(user)}
-                  >
-                    <Pencil />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip placement='top' title='Delete user'>
-                  <IconButton
-                    className={classes.small}
-                    onClick={() => onDelete(user.id)}
-                  >
-                    <DeleteOutline />
-                  </IconButton>
-                </Tooltip>
-              </div>
-            </TableCell>
-          </TableRow>
-        ))}
+        {
+          Object.keys(whitelists).map(whitelistName => (
+            <TableRow
+              key={whitelistName}
+              className='contains-inv-actions'
+            >
+              <TableCell component='th' scope='row'>
+                {whitelistName}
+              </TableCell>
+              <TableCell>
+                {whitelists[whitelistName].map(i => <T key={i}>{i} </T>)}
+              </TableCell>
+              <TableCell align='right'>
+                <div className='inv-actions' style={{ float: 'right' }}>
+                  {/* <Tooltip placement='top' title='Edit whitelist'> */}{/* todo: re-implement this */}
+                  {/*   <IconButton */}
+                  {/*     className={clsx(classes.small, classes.iconOffset)} */}
+                  {/*     onClick={() => onEdit(user)} */}
+                  {/*   > */}
+                  {/*     <Pencil /> */}
+                  {/*   </IconButton> */}
+                  {/* </Tooltip> */}
+                  <Tooltip placement='top' title={'Delete whitelist ' + "'" + whitelistName + "'"}>
+                    <IconButton className={classes.small} onClick={() => onDelete(whitelistName)}>
+                      <DeleteOutline />
+                    </IconButton>
+                  </Tooltip>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))
+        }
       </TableBody>
     </Table>
   )
