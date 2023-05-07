@@ -16,6 +16,7 @@ import WhitelistsTable from './WhitelistsTable'
 import NewUserDialog from './dialogs/NewUserDialog'
 import NewWhitelistDialog from './dialogs/NewWhitelistDialog'
 import EditUserDialog from './dialogs/EditUserDialog'
+import EditWhitelistDialog from './dialogs/EditWhitelistDialog'
 
 export {
   Navigation,
@@ -35,5 +36,6 @@ export {
   WhitelistsTable,
   NewUserDialog,
   NewWhitelistDialog,
-  EditUserDialog
+  EditUserDialog,
+  EditWhitelistDialog
 }

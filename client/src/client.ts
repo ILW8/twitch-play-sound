@@ -1,4 +1,4 @@
-import { Sound, TwitchUser, NewSoundNoUpload, User, NewUser } from './types'
+import { Sound, TwitchUser, NewSoundNoUpload, User, NewUser, Whitelists, Whitelist } from './types'
 
 const checkResponse = (res: Response): Response => {
   if (!res.ok) {
@@ -88,6 +88,60 @@ export const fetchUser = (): Promise<TwitchUser> => fetch(
   '/api/twitch',
   {
     method: 'GET',
+    headers: { 'Content-Type': 'application/json' }
+  }
+)
+  .then(checkResponse)
+  .then((res) => res.json())
+
+export const fetchWhitelists = (): Promise<Whitelists> => fetch(
+  '/api/whitelists',
+  {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' }
+  }
+)
+  .then(checkResponse)
+  .then((res) => res.json())
+
+export const addWhitelist = (
+  name: string,
+  whitelist: Whitelist
+): Promise<Whitelists> => {
+  return fetch(
+    '/api/whitelists',
+    {
+      method: 'POST',
+      body: JSON.stringify({ name: name, data: whitelist }),
+      headers: { 'Content-Type': 'application/json' }
+    }
+  )
+    .then(checkResponse)
+    .then((res) => res.json())
+}
+
+export const deleteWhitelist = (
+  name: string
+): Promise<Whitelists> => {
+  return fetch(
+    '/api/whitelists/' + name,
+    {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' }
+    }
+  )
+    .then(checkResponse)
+    .then((res) => res.json())
+}
+
+export const editWhitelist = (
+  name: string,
+  data: Whitelist
+): Promise<Whitelists> => fetch(
+  '/api/whitelists/' + name,
+  {
+    method: 'PUT',
+    body: JSON.stringify({ data: data }),
     headers: { 'Content-Type': 'application/json' }
   }
 )

@@ -2,7 +2,7 @@ import React from 'react'
 import clsx from 'clsx'
 
 import {
-  User, Whitelists
+  Whitelist, Whitelists
 } from '../../types'
 
 import {
@@ -49,7 +49,7 @@ interface Props {
   whitelists: Whitelists,
   loading: boolean,
   onDelete: (id: string) => void,
-  onEdit: (user: User) => void
+  onEdit: (editableWhitelist: { name: string, whitelist: Whitelist }) => void
 }
 
 export default ({
@@ -90,14 +90,14 @@ export default ({
               </TableCell>
               <TableCell align='right'>
                 <div className='inv-actions' style={{ float: 'right' }}>
-                  {/* <Tooltip placement='top' title='Edit whitelist'> */}{/* todo: re-implement this */}
-                  {/*   <IconButton */}
-                  {/*     className={clsx(classes.small, classes.iconOffset)} */}
-                  {/*     onClick={() => onEdit(user)} */}
-                  {/*   > */}
-                  {/*     <Pencil /> */}
-                  {/*   </IconButton> */}
-                  {/* </Tooltip> */}
+                  <Tooltip placement='top' title='Edit whitelist'>
+                    <IconButton
+                      className={clsx(classes.small, classes.iconOffset)}
+                      onClick={() => onEdit({ name: whitelistName, whitelist: whitelists[whitelistName] })}
+                    >
+                      <Pencil />
+                    </IconButton>
+                  </Tooltip>
                   <Tooltip placement='top' title={'Delete whitelist ' + "'" + whitelistName + "'"}>
                     <IconButton className={classes.small} onClick={() => onDelete(whitelistName)}>
                       <DeleteOutline />
