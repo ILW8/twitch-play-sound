@@ -59,8 +59,8 @@ export const useSounds = (): SoundContext => {
     else {
       return client.editSoundNoUpload(sound.id, {
         access: sound.access,
-        accessWhitelists: sound.access,
-        accessUsernames: sound.access,
+        accessWhitelists: sound.accessWhitelists,
+        accessUsernames: sound.accessUsernames,
         command: sound.command,
         level: sound.level
       })

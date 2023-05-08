@@ -79,6 +79,7 @@ export default () => {
         sound={editableSound}
         onEdit={editSound}
         setSound={setEditableSound}
+        whitelists={whitelists}
       />
     </Layout>
   )

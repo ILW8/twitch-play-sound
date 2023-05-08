@@ -88,7 +88,6 @@ export default ({
       </TableHead>
       <TableBody>
         {sounds.map(sound => {
-          console.log(sound)
           return (
             <TableRow
               key={sound.id}

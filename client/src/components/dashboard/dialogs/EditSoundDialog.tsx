@@ -1,7 +1,6 @@
-import React, { Dispatch, SetStateAction, Fragment } from 'react'
+import React, { Dispatch, SetStateAction, Fragment, useState } from 'react'
 
-import { EditSound } from '../../../types'
-import accessLevel from '../../../enums/accessLevels'
+import { AccessLevelRolesConst, EditSound, Whitelists } from '../../../types'
 import { customColors } from '../../../theme'
 import { IconHelper } from '../'
 
@@ -25,7 +24,7 @@ import {
   Input,
   Slider,
   IconButton,
-  Tooltip
+  Tooltip, Chip, DialogContentText
 } from '@material-ui/core'
 
 import {
@@ -59,6 +58,15 @@ const useStyles = makeStyles((theme: Theme) =>
       verticalAlign: 'super',
       fontWeight: 400,
       marginLeft: theme.spacing(1)
+    },
+    chip: {
+      margin: theme.spacing(0, 0.5),
+      cursor: 'pointer'
+    },
+    chips: {
+      display: 'flex',
+      flexWrap: 'wrap',
+      cursor: 'pointer'
     }
   })
 )
@@ -68,7 +76,8 @@ interface Props {
   onClose: () => void,
   onEdit: (sound: EditSound) => Promise<void>,
   sound: EditSound | null,
-  setSound: Dispatch<SetStateAction<EditSound | null>>
+  setSound: Dispatch<SetStateAction<EditSound | null>>,
+  whitelists: Whitelists
 }
 
 export default ({
@@ -76,9 +85,23 @@ export default ({
   onClose,
   onEdit,
   sound,
-  setSound
+  setSound,
+  whitelists
 }: Props) => {
   const classes = useStyles()
+  const [newName, setNewName] = useState<string>('')
+
+  const appendToCustomOverrides = () => {
+    if (!sound) return
+    if (!sound.accessUsernames.includes(newName)) {
+      let accessUsernames = sound.accessUsernames
+      accessUsernames.push(newName)
+      setSound({
+        ...sound,
+        accessUsernames: accessUsernames
+      })
+    }
+  }
 
   const _handleClose = () => {
     onClose()
@@ -89,6 +112,8 @@ export default ({
       onEdit({
         id: sound.id,
         access: sound.access,
+        accessWhitelists: sound.accessWhitelists,
+        accessUsernames: sound.accessUsernames,
         command: sound.command,
         file: sound.file,
         level: Number(sound.level),
@@ -136,7 +161,7 @@ export default ({
       onClose={_handleClose}
       aria-labelledby='active-dialog-title'
     >
-      <DialogTitle id='active-dialog-title'>Add new sound</DialogTitle>
+      <DialogTitle id='active-dialog-title'>Edit sound</DialogTitle>
       <DialogContent>
         <TextField
           label='Command'
@@ -151,7 +176,7 @@ export default ({
         />
         <FormControl variant='outlined' fullWidth>
           <InputLabel htmlFor='select-access-level'>
-            Select Access Level
+            Roles whitelist
           </InputLabel>
           <Select
             value={sound.access}
@@ -159,23 +184,115 @@ export default ({
               ...sound,
               access: e.target.value
             })}
+            multiple
             fullWidth
+            renderValue={selected => (
+              <div className={classes.chips}>
+                {(selected as string[]).map(value => (
+                  <div key={value}>
+                    <IconHelper access={value} />
+                    <Chip label={value} className={classes.chip} />
+                  </div>
+                ))}
+              </div>
+            )}
             input={
               <OutlinedInput
-                fullWidth
                 labelWidth={123}
-                value={sound.access}
-                name='type'
-                id='select-access-level'
               />
             }
           >
-            {accessLevel.map(s => (
+            {AccessLevelRolesConst.map(s => (
               <MenuItem key={s} value={s} className={classes.menuitem}>
                 <IconHelper access={s} /> <T variant='h4' className={classes.menuItemText}>{s}</T>
               </MenuItem>
             ))}
           </Select>
+        </FormControl>
+
+        <DialogContentText>Whitelists</DialogContentText>
+        <FormControl variant='outlined' fullWidth margin={'normal'}>
+          <InputLabel htmlFor='select-whitelist'>
+            Custom whitelists
+          </InputLabel>
+          <Select
+            value={sound.accessWhitelists}
+            onChange={(e: any) => setSound({
+              ...sound,
+              accessWhitelists: e.target.value
+            })}
+            multiple
+            fullWidth
+            renderValue={selected => (
+              <div className={classes.chips}>
+                {(selected as string[]).map(value => (
+                  <Chip key={value} label={value} className={classes.chip} />
+                ))}
+              </div>
+            )}
+            input={
+              <OutlinedInput
+                labelWidth={123}
+              />
+            }
+          >
+            {Object.keys(whitelists).map(s => (
+              <MenuItem key={s} value={s} className={classes.menuitem}>
+                <T variant='h4' className={classes.menuItemText}>{s}</T>
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <DialogContentText>Custom user overrides</DialogContentText>
+        <Grid container spacing={0}>
+          <Grid item xs>
+            <TextField
+              label='Twitch username'
+              onChange={e => setNewName(e.currentTarget.value)}
+              fullWidth
+              variant='outlined'
+              className={classes.text}
+            />
+          </Grid>
+          <Grid item xs>
+            <Button variant={'contained'} onClick={appendToCustomOverrides} color='primary'>
+              Add {newName} to custom overrides
+            </Button>
+          </Grid>
+        </Grid>
+        <FormControl variant='outlined' fullWidth margin={'normal'}>
+          <InputLabel htmlFor='select-username-overrides'>
+            Custom username override (allow)
+          </InputLabel>
+          <Select
+            value={sound.accessUsernames}
+            onChange={(e: any) => setSound({
+              ...sound,
+              accessUsernames: e.target.value
+            })}
+            multiple
+            fullWidth
+            renderValue={selected => (
+              <div className={classes.chips}>
+                {(selected as string[]).map(value => (
+                  <Chip key={value} label={value} className={classes.chip} />
+                ))}
+              </div>
+            )}
+            input={
+              <OutlinedInput
+                labelWidth={123}
+              />
+            }
+          >
+            {sound.accessUsernames.map(s => (
+              <MenuItem key={s} value={s} className={classes.menuitem}>
+                <T variant='h4' className={classes.menuItemText}>{s}</T>
+              </MenuItem>
+            ))}
+          </Select>
+
         </FormControl>
         <input
           className={classes.input}
@@ -255,7 +372,7 @@ export default ({
         </Button>
         {sound.command !== '' && (
           <Button onClick={_handleUpload} color='primary'>
-            Add
+            Update
           </Button>
         )}
       </DialogActions>
