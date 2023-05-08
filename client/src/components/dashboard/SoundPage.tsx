@@ -18,6 +18,7 @@ import {
 } from '@material-ui/core'
 
 import { Plus } from 'mdi-material-ui'
+import { useWhitelists } from '../../hooks'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -40,6 +41,11 @@ export default () => {
     deleteSound
   } = useSounds()
 
+  const {
+    whitelists,
+    loading: whitelistsLoading
+  } = useWhitelists()
+
   const [ isNewDialogOpen, setIsNewDialogOpen ] = useState(false)
   const [ editableSound, setEditableSound ] = useState<null | EditSound>(null)
 
@@ -47,7 +53,7 @@ export default () => {
     <Layout title='Sound Manager'>
       <SoundTable
         sounds={sounds}
-        loading={loading}
+        loading={loading || whitelistsLoading}
         onDelete={deleteSound}
         onEdit={setEditableSound}
       />
@@ -65,6 +71,7 @@ export default () => {
         isOpen={isNewDialogOpen}
         onClose={() => setIsNewDialogOpen(false)}
         onAdd={addSound}
+        whitelists={whitelists}
       />
       <EditSoundDialog
         isOpen={editableSound !== null}

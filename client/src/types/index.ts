@@ -1,36 +1,35 @@
-export type AccessLevel = 'ALL' | 'VIP' | 'MOD' | 'SUB' | 'WHITELIST'
+export const AccessLevelRolesConst = ['ALL', 'VIP', 'MOD', 'SUB'] as const
+export type AccessLevelRoles = typeof AccessLevelRolesConst[number];
 export type UserFlags = 'ban' | 'all-access'
 
 export type AccessPermissions = string[];
 
 export interface Sound {
   id: string,
-  access: AccessPermissions,
+  access: AccessLevelRoles[], // list of access roles
+  accessWhitelists: string[], // list of whitelists
+  accessUsernames: string[], // list of usernames
   command: string,
   path: string,
   level: number
 }
 
-export interface NewSound {
-  access: AccessPermissions,
-  command: string,
-  file: File,
-  level: number
+export interface NewSound extends NewSoundNoUpload{
+  file: File
 }
 
 export interface NewSoundNoUpload {
-  access: AccessLevel,
+  access: AccessLevelRoles[], // list of access roles
+  accessWhitelists: string[], // list of whitelists
+  accessUsernames: string[], // list of usernames
   command: string,
   level: number
 }
 
-export interface EditSound {
+export interface EditSound extends NewSoundNoUpload {
   id: string,
-  access: AccessLevel,
-  command: string,
   file: File | null,
-  path: string,
-  level: number
+  path: string
 }
 
 export interface TwitchUser {

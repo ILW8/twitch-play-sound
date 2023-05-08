@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 
-import { AccessLevel, NewSound } from '../../../types'
-import accessLevel from '../../../enums/accessLevels'
+import { AccessLevelRoles, AccessLevelRolesConst, NewSound, Whitelists } from '../../../types'
 import { customColors } from '../../../theme'
 import { IconHelper } from '../'
 
@@ -25,7 +24,7 @@ import {
   Input,
   Slider,
   IconButton,
-  Tooltip
+  Tooltip, Chip, DialogContentText
 } from '@material-ui/core'
 
 import {
@@ -59,6 +58,15 @@ const useStyles = makeStyles((theme: Theme) =>
       verticalAlign: 'super',
       fontWeight: 400,
       marginLeft: theme.spacing(1)
+    },
+    chip: {
+      margin: theme.spacing(0, 0.5),
+      cursor: 'pointer'
+    },
+    chips: {
+      display: 'flex',
+      flexWrap: 'wrap',
+      cursor: 'pointer'
     }
   })
 )
@@ -66,11 +74,14 @@ const useStyles = makeStyles((theme: Theme) =>
 interface Props {
   isOpen: boolean,
   onClose: () => void,
-  onAdd: (sound: NewSound) => Promise<void>
+  onAdd: (sound: NewSound) => Promise<void>,
+  whitelists: Whitelists
 }
 
 interface State {
-  access: AccessLevel,
+  access: AccessLevelRoles[], // list of access roles
+  accessWhitelists: string[], // list of whitelists
+  accessUsernames: string[], // list of usernames
   command: string,
   file: File | null,
   level: number | number[],
@@ -78,7 +89,9 @@ interface State {
 }
 
 const getInitialState = (): State => ({
-  access: 'ALL',
+  access: [], // list of access roles
+  accessWhitelists: [], // list of whitelists
+  accessUsernames: [], // list of usernames
   command: '',
   file: null,
   level: 50,
@@ -88,10 +101,23 @@ const getInitialState = (): State => ({
 export default ({
   isOpen,
   onClose,
-  onAdd
+  onAdd,
+  whitelists
 }: Props) => {
   const classes = useStyles()
   const [state, setState] = useState<State>(getInitialState)
+  const [newName, setNewName] = useState<string>('')
+
+  const appendToCustomOverrides = () => {
+    if (!state.accessUsernames.includes(newName)) {
+      let accessUsernames = state.accessUsernames
+      accessUsernames.push(newName)
+      setState({
+        ...state,
+        accessUsernames: accessUsernames
+      })
+    }
+  }
 
   const _handleClose = () => {
     onClose()
@@ -102,6 +128,8 @@ export default ({
     if (state.file !== null && state.command !== '') {
       onAdd({
         access: state.access,
+        accessWhitelists: state.accessWhitelists,
+        accessUsernames: state.accessUsernames,
         command: state.command,
         file: state.file,
         level: Number(state.level)
@@ -159,9 +187,10 @@ export default ({
           variant='outlined'
           className={classes.text}
         />
+        <DialogContentText>Roles</DialogContentText>
         <FormControl variant='outlined' fullWidth>
           <InputLabel htmlFor='select-access-level'>
-            Select Access Level
+            Roles whitelist
           </InputLabel>
           <Select
             value={state.access}
@@ -169,25 +198,118 @@ export default ({
               ...state,
               access: e.target.value
             })}
+            multiple
             fullWidth
+            renderValue={selected => (
+              <div className={classes.chips}>
+                {(selected as string[]).map(value => (
+                  <div key={value}>
+                    <IconHelper access={value} />
+                    <Chip label={value} className={classes.chip} />
+                  </div>
+                ))}
+              </div>
+            )}
             error={state.error}
             input={
               <OutlinedInput
-                fullWidth
                 labelWidth={123}
-                value={state.access}
-                name='type'
-                error={state.error}
-                id='select-access-level'
               />
             }
           >
-            {accessLevel.map(s => (
+            {AccessLevelRolesConst.map(s => (
               <MenuItem key={s} value={s} className={classes.menuitem}>
                 <IconHelper access={s} /> <T variant='h4' className={classes.menuItemText}>{s}</T>
               </MenuItem>
             ))}
           </Select>
+        </FormControl>
+
+        <DialogContentText>Whitelists</DialogContentText>
+        <FormControl variant='outlined' fullWidth margin={'normal'}>
+          <InputLabel htmlFor='select-whitelist'>
+            Custom whitelists
+          </InputLabel>
+          <Select
+            value={state.accessWhitelists}
+            onChange={(e: any) => setState({
+              ...state,
+              accessWhitelists: e.target.value
+            })}
+            multiple
+            fullWidth
+            renderValue={selected => (
+              <div className={classes.chips}>
+                {(selected as string[]).map(value => (
+                  <Chip key={value} label={value} className={classes.chip} />
+                ))}
+              </div>
+            )}
+            error={state.error}
+            input={
+              <OutlinedInput
+                labelWidth={123}
+              />
+            }
+          >
+            {Object.keys(whitelists).map(s => (
+              <MenuItem key={s} value={s} className={classes.menuitem}>
+                <T variant='h4' className={classes.menuItemText}>{s}</T>
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <DialogContentText>Custom user overrides</DialogContentText>
+        <Grid container spacing={0}>
+          <Grid item xs>
+            <TextField
+              label='Twitch username'
+              onChange={e => setNewName(e.currentTarget.value)}
+              fullWidth
+              variant='outlined'
+              className={classes.text}
+            />
+          </Grid>
+          <Grid item xs>
+            <Button variant={'contained'} onClick={appendToCustomOverrides} color='primary'>
+              Add {newName} to custom overrides
+            </Button>
+          </Grid>
+        </Grid>
+        <FormControl variant='outlined' fullWidth margin={'normal'}>
+          <InputLabel htmlFor='select-username-overrides'>
+            Custom username override (allow)
+          </InputLabel>
+          <Select
+            value={state.accessUsernames}
+            onChange={(e: any) => setState({
+              ...state,
+              accessUsernames: e.target.value
+            })}
+            multiple
+            fullWidth
+            renderValue={selected => (
+              <div className={classes.chips}>
+                {(selected as string[]).map(value => (
+                  <Chip key={value} label={value} className={classes.chip} />
+                ))}
+              </div>
+            )}
+            error={state.error}
+            input={
+              <OutlinedInput
+                labelWidth={123}
+              />
+            }
+          >
+            {state.accessUsernames.map(s => (
+              <MenuItem key={s} value={s} className={classes.menuitem}>
+                <T variant='h4' className={classes.menuItemText}>{s}</T>
+              </MenuItem>
+            ))}
+          </Select>
+
         </FormControl>
         <input
           className={classes.input}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Sound, NewSound, EditSound } from '../types'
+import { Sound, NewSound, EditSound, NewSoundNoUpload } from '../types'
 
 import * as client from '../client'
 
@@ -9,6 +9,22 @@ interface SoundContext {
   addSound: (sound: NewSound) => Promise<void>,
   editSound: (sound: EditSound) => Promise<void>,
   deleteSound: (id: string) => void
+}
+
+function populateForm (sound: NewSoundNoUpload) {
+  const form = new FormData()
+  sound.access.map((val) => {
+    form.append('access[]', val)
+  })
+  sound.accessWhitelists.map((val) => {
+    form.append('accessWhitelists[]', val)
+  })
+  sound.accessUsernames.map((val) => {
+    form.append('accessUsernames[]', val)
+  })
+  form.append('command', sound.command)
+  form.append('level', sound.level.toString())
+  return form
 }
 
 export const useSounds = (): SoundContext => {
@@ -22,11 +38,8 @@ export const useSounds = (): SoundContext => {
     })
 
   const addSound = (sound: NewSound): Promise<void> => {
-    const form = new FormData()
-    form.append('access', sound.access)
-    form.append('command', sound.command)
+    const form = populateForm(sound)
     form.append('sound', sound.file)
-    form.append('level', sound.level.toString())
     return client.addSound(form)
       .then(s => setSounds([...sounds, s]))
   }
@@ -38,10 +51,7 @@ export const useSounds = (): SoundContext => {
 
   const editSound = (sound: EditSound) => {
     if (sound.file) {
-      const form = new FormData()
-      form.append('access', sound.access)
-      form.append('command', sound.command)
-      form.append('level', sound.level.toString())
+      const form = populateForm(sound)
       form.append('sound', sound.file)
       return client.editSound(sound.id, form)
         .then(s => setSounds(sounds.map(i => i.id === s.id ? s : i)))
@@ -49,6 +59,8 @@ export const useSounds = (): SoundContext => {
     else {
       return client.editSoundNoUpload(sound.id, {
         access: sound.access,
+        accessWhitelists: sound.access,
+        accessUsernames: sound.access,
         command: sound.command,
         level: sound.level
       })
@@ -57,7 +69,7 @@ export const useSounds = (): SoundContext => {
   }
 
   useEffect(() => {
-    getSounds()
+    getSounds().then(null)
   }, [])
 
   return {
