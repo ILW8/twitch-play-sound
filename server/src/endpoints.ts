@@ -18,7 +18,7 @@ router.use(bodyParser.json())
 router.post('/sounds', soundUpload.single('sound'), async (req: Request, res: Response) => {
   try {
     let { access, command, level, accessWhitelists, accessUsernames } = req.body
-    accessWhitelists = (typeof accessWhitelists === 'undefined') ? 0 : accessWhitelists
+    accessWhitelists = (typeof accessWhitelists === 'undefined') ? [] : accessWhitelists
     accessUsernames = (typeof accessUsernames === 'undefined') ? [] : accessUsernames
     access = (typeof access === 'undefined') ? [] : access
     console.log(access, command, level, accessWhitelists, accessUsernames)
